@@ -113,7 +113,7 @@ const create = async (req, res) => {
             });
             fs.writeFileSync(`uploads/barcodes/${barcodeFileName}`, barcodeBuffer);
             application = await Application.findById(application._id).populate(['persons.visaType', 'persons.travelType']);
-            logo = await Logo.findOne();
+            let logo = await Logo.findOne();
             persons = [];
             for (person of application.persons) {
                 let pdfOptions = { format: "A4" }
@@ -156,20 +156,20 @@ const create = async (req, res) => {
                         </head>
                         <body>
                             <div class="header">
-                                <img src="${req.protocol}://${req.headers.host}/map.png" class="corp-map"/>
+                                <img src="${req.protocol}://${req.headers.host}/uploads/map.png" class="corp-map"/>
                                 <div class="left-header">
                                     <div class="left-top-header">
-                                        <img class="corp-logo" src="${req.protocol}://${req.headers.host}/${logo.imageUrl}"/>
+                                        <img class="corp-logo" src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 140px; height: auto; margin-top: 25px"/>
                                         <div><h3 class="corp-brand">Submitted Visa Application Form</h3></div>
                                     </div>
                                     <div class="left-bottom-header"><p>Date: ${moment().format("MM/DD/YYYY")}</p><p>Application ID: ${application._id}</p></div>
                                 </div>
-                                <div class="right-header"><img class="qrcode" src="${req.protocol}://${req.headers.host}/qrcodes/${qrcodeFileName}"/></div>
+                                <div class="right-header"><img class="qrcode" src="${req.protocol}://${req.headers.host}/uploads/qrcodes/${qrcodeFileName}"/></div>
                             </div>
                             <div class="content">
                                 <div class="photo-section">
                                     <div class="photo-wrapper">
-                                        <div class="photo-wrap"><img src="${req.protocol}://${req.headers.host}/personal_photos/${person.personalPhoto}" class="passport-photo"/></div>
+                                        <div class="photo-wrap"><img src="${req.protocol}://${req.headers.host}/uploads/personal_photos/${person.personalPhoto}" class="passport-photo"/></div>
                                         <div class="applicant-name">${person.firstName} ${person.lastName}</div>
                                     </div>
                                 </div>
@@ -188,7 +188,7 @@ const create = async (req, res) => {
                                     </table>
                                 </div>
                                 <div class="barcode-section">
-                                    <img class="barcode" src="${req.protocol}://${req.headers.host}/barcodes/${barcodeFileName}"/>
+                                    <img class="barcode" src="${req.protocol}://${req.headers.host}/uploads/barcodes/${barcodeFileName}"/>
                                     <div class="created-time">${moment(application.createdAt).format("MM/DD/YYYY")}</div>
                                 </div>
                             </div>
@@ -225,7 +225,6 @@ const create = async (req, res) => {
                     subject: "Your Application has been submitted successfully.",
                     html: `
                         <div style="padding-top: 30px; padding-bottom: 30px;">
-                            <style>@import url('https://fonts.cdnfonts.com/css/montserrat');* {font-family: 'Montserrat', sans-serif;color: #333333;}</style>
                             <div style="overflow: auto; padding: 10px 50px; background:rgba(223, 231, 233, 0.1)">
                                 <div style="float:left; width: 60%; overflow: auto;">
                                     <div style="float: left;">
@@ -234,10 +233,10 @@ const create = async (req, res) => {
                                         <h4 style="margin-top: 5px; margin-bottom: 5px;">Application ID: ${application._id}</h4>
                                     </div> 
                                     <div style="float: right; text-align: right;">
-                                        <img src="https://instructorsdash.com/images/company.jpg" style="max-height: 120px; height: 100%;"/>
+                                        <img src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 250px; height: auto;"/>
                                     </div>
                                 </div>
-                                <div style="float:right; width: 40%; text-align: right;"><img src="https://instructorsdash.com/images/map.png" style="height: 120px;"/></div>
+                                <div style="float:right; width: 40%; text-align: right;"><img src="${req.protocol}://${req.headers.host}/uploads/map.png" style="height: 120px;"/></div>
                             </div>
                             <div style="padding: 20px 50px;">
                                 <h3>Your Application <span style="background-color: #175593; color: #fafafa; display: inline-block; padding: 1px 3px;">${application._id}</span> has been submitted successfully.</h3>
@@ -245,7 +244,7 @@ const create = async (req, res) => {
                                     Please find attached the application form or <br/>download your application through the following button
                                 </p>
                                 <div style="margin-top: 50px; text-align: center">
-                                    <a download href="https://instructorsdash.com/images/sample.pdf" style="background:#28A820; text-decoration: none; display: inline-block; font-weight: bold; border-radius: 8px; padding: 25px 50px; color: #fafafa; line-height: 0px; font-size: 18px; border: none ">Download</a>
+                                    <a download href="${req.protocol}://${req.headers.host}/uploads/pdfs/${person.pdf}" style="background:#28A820; text-decoration: none; display: inline-block; font-weight: bold; border-radius: 8px; padding: 25px 50px; color: #fafafa; line-height: 0px; font-size: 18px; border: none ">Download</a>
                                 </div>
                             </div>
                             <div style="margin-top: 20px;">
@@ -260,7 +259,7 @@ const create = async (req, res) => {
                                 </div>
                             </div>
                             <div style="overflow: auto;">
-                                <img src="https://instructorsdash.com/images/company.jpg" style="float: left; max-height: 120px;"/>
+                                <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 150px"/>
                                 <div style="float: left">
                                     <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Company Name</h4>
                                     <h5 style="margin: 0px;">Visa Application Form</h5>
@@ -389,6 +388,7 @@ const update = async (req, res) => {
             }
         }
         await application.update(data);
+        let logo = await Logo.findOne();
         for (person of application.persons) {
             let attachments = [{
                 content: fs.readFileSync(`uploads/pdfs/${person.pdf}`) .toString("base64"),
@@ -410,7 +410,6 @@ const update = async (req, res) => {
                 subject: data.status == "approved" ? "Your Application has been approved." : "Your Application has been decliend.",
                 html: `
                     <div style="padding-top: 30px; padding-bottom: 30px;">
-                        <style>@import url('https://fonts.cdnfonts.com/css/montserrat');* {font-family: 'Montserrat', sans-serif;color: #333333;}</style>
                         <div style="overflow: auto; padding: 10px 50px; background:rgba(223, 231, 233, 0.1)">
                             <div style="float:left; width: 60%; overflow: auto;">
                                 <div style="float: left;">
@@ -419,7 +418,7 @@ const update = async (req, res) => {
                                     <h4 style="margin-top: 5px; margin-bottom: 5px;">Application ID: ${application._id}</h4>
                                 </div> 
                                 <div style="float: right; text-align: right;">
-                                    <img src="https://instructorsdash.com/images/company.jpg" style="max-height: 120px; height: 100%;"/>
+                                <img src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 250px; height: auto;"/>
                                 </div>
                             </div>
                             <div style="float:right; width: 40%; text-align: right;"><img src="https://instructorsdash.com/images/map.png" style="height: 120px;"/></div>
@@ -430,7 +429,7 @@ const update = async (req, res) => {
                                 <h3>Your Application <span style="background-color: #175593; color: #fafafa; display: inline-block; padding: 1px 3px;">${application._id}</span> has been <span style="color: #28A820">approved</span>.</h3>
                                 <p>Please find attached the application form or <br/>download your application through the following button</p>
                                 <div style="margin-top: 50px; text-align: center">
-                                    <a download href="https://instructorsdash.com/images/sample.pdf" style="background:#28A820; text-decoration: none; display: inline-block; font-weight: bold; border-radius: 8px; padding: 25px 50px; color: #fafafa; line-height: 0px; font-size: 18px; border: none ">Download</a>
+                                <a download href="${req.protocol}://${req.headers.host}/uploads/pdfs/${person.pdf}" style="background:#28A820; text-decoration: none; display: inline-block; font-weight: bold; border-radius: 8px; padding: 25px 50px; color: #fafafa; line-height: 0px; font-size: 18px; border: none ">Download</a>
                                 </div>
                             </div>
                             <div style="margin-top: 20px;">
@@ -458,7 +457,7 @@ const update = async (req, res) => {
                             `
                         }
                         <div style="overflow: auto;">
-                            <img src="https://instructorsdash.com/images/company.jpg" style="float: left; max-height: 120px;"/>
+                        <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 15px;"/>
                             <div style="float: left">
                                 <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Company Name</h4>
                                 <h5 style="margin: 0px;">Visa Application Form</h5>
