@@ -171,7 +171,7 @@ const order = async (req, res) => {
                             <img src="${req.protocol}://${req.headers.host}/uploads/map.png" class="corp-map"/>
                             <div class="left-header">
                                 <div class="left-top-header">
-                                    <img class="corp-logo" src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 140px; height: auto; margin-top: 25px;"/>
+                                    <img class="corp-logo" src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="max-width: 140px; height: auto; margin-top: 25px;"/>
                                     <div><h3 class="corp-brand">Submitted Visa Application Form</h3></div>
                                 </div>
                                 <div class="left-bottom-header"><p>Date: ${moment().format("MM/DD/YYYY")}</p><p>Application ID: ${application._id}</p></div>
@@ -290,17 +290,17 @@ const order = async (req, res) => {
                     disposition: "attachment"
                 }]
             });
-            // if (person.country === "UK") {
+            if (person.country === "UK") {
                 // SEND SMS
-                // let result = await twilio.messages.create({
-                //     body: `
-                //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
-                //         Visa Application Form / http://localhost:5000
-                //     `,
-                //     from: `+${process.env.TWILIO_PHONE}`,
-                //     to: `+447380520373`
-                // });
-                // // SEND WHATSAPP
+                let result = await twilio.messages.create({
+                    body: `
+                        Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
+                        Visa Application Form the following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
+                    `,
+                    from: `+${process.env.TWILIO_PHONE}`,
+                    to: `${person.phone}`
+                });
+                // SEND WHATSAPP
                 // result = await twilio.messages.create({
                 //     body: `
                 //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
@@ -309,7 +309,7 @@ const order = async (req, res) => {
                 //     from: `whatsapp:+447380520373`,
                 //     to: `whatsapp:+447470174216`
                 // });
-            // }
+            }
         }
         await Application.findByIdAndUpdate(id, {persons: persons});
         res.json({

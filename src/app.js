@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 app.use(express.static(__dirname + "/views"));
-connect("mongodb://0.0.0.0:27017");
+connect("mongodb://localhost:27017");
 seedDB();
 
 app.use('/api/v1', api);

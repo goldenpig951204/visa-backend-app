@@ -8,7 +8,7 @@ const create = async (req, res) => {
         let { filename } = req.file;
         let imageUrl = filename;
         let logo = await Logo.findOne({});
-        if (logo) {
+        if (logo && fs.existsSync(`uploads/logos/${logo.imageUrl}`)) {
             fs.unlinkSync(`uploads/logos/${logo.imageUrl}`);
             await logo.delete();
         }
@@ -35,7 +35,7 @@ const fetch = async (req, res) => {
 const remove = async (req, res) => {
     try {
         let logo = await Logo.findOne({});
-        if (logo) {
+        if (logo && fs.existsSync(`uploads/logos/${logo.imageUrl}`)) {
             fs.unlinkSync(`uploads/logos/${logo.imageUrl}`);
             await logo.delete();
             res.json({

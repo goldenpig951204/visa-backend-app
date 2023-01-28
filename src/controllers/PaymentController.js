@@ -9,6 +9,7 @@ const createPaymentIntent = async (req, res) => {
             enabled: true
         }
     });
+    console.log("ClientSecret====>", clientSecret);
     res.json({
         clientSecret: paymentIntent.client_secret
     });

@@ -278,17 +278,17 @@ const create = async (req, res) => {
                         disposition: "attachment"
                     }]
                 });
-                // if (person.country === "UK") {
+                if (person.country === "UK") {
                     // SEND SMS
-                    // let result = await twilio.messages.create({
-                    //     body: `
-                    //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
-                    //         Visa Application Form / http://localhost:5000
-                    //     `,
-                    //     from: `+${process.env.TWILIO_PHONE}`,
-                    //     to: `+447380520373`
-                    // });
-                    // // SEND WHATSAPP
+                    let result = await twilio.messages.create({
+                        body: `
+                            Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
+                            Visa Application Form following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
+                        `,
+                        from: `+${process.env.TWILIO_PHONE}`,
+                        to: person.phone
+                    });
+                    // SEND WHATSAPP
                     // result = await twilio.messages.create({
                     //     body: `
                     //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
@@ -297,7 +297,7 @@ const create = async (req, res) => {
                     //     from: `whatsapp:+447380520373`,
                     //     to: `whatsapp:+447470174216`
                     // });
-                // }
+                }
             }
             await Application.findByIdAndUpdate(application._id, {persons: persons});
             return res.json({
@@ -391,7 +391,7 @@ const update = async (req, res) => {
         let logo = await Logo.findOne();
         for (person of application.persons) {
             let attachments = [{
-                content: fs.readFileSync(`uploads/pdfs/${person.pdf}`) .toString("base64"),
+                content: fs.existsSync(`uploads/pdfs/${person.pdf}`) ? fs.readFileSync(`uploads/pdfs/${person.pdf}`).toString("base64") : "",
                 type: "application/pdf",
                 filename: "application.pdf",
                 disposition: "attachment"
