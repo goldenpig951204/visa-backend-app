@@ -6,10 +6,10 @@ const Logo = require("../../models/Logo");
 const create = async (req, res) => {
     try {
         let { filename } = req.file;
-        let imageUrl = "logos/" + filename;
+        let imageUrl = filename;
         let logo = await Logo.findOne({});
         if (logo) {
-            fs.unlinkSync(`uploads/logos/${path.basename(logo.imageUrl)}`);
+            fs.unlinkSync(`uploads/logos/${logo.imageUrl}`);
             await logo.delete();
         }
         await Logo.create({ 
@@ -36,7 +36,7 @@ const remove = async (req, res) => {
     try {
         let logo = await Logo.findOne({});
         if (logo) {
-            fs.unlinkSync(`uploads/logos/${path.basename(logo.imageUrl)}`);
+            fs.unlinkSync(`uploads/logos/${logo.imageUrl}`);
             await logo.delete();
             res.json({
                 status: true,
