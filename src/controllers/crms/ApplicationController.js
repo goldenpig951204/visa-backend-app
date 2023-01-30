@@ -85,7 +85,8 @@ const create = async (req, res) => {
                 issuedDate: data.issuedDate[i],
                 expireDate: data.expireDate[i],
                 personalPhoto: data.personalPhoto[i],
-                passportPhoto: data.passportPhoto[i]
+                passportPhoto: data.passportPhoto[i],
+                note: data.note[i]
             }
             persons.push(person);
         }
@@ -135,7 +136,7 @@ const create = async (req, res) => {
                                 .header .left-header h3.corp-brand {font-size: 22px;line-height: 1;color: #62686c;font-weight: 700;margin-top: 5px;margin-bottom: 5px;}
                                 .header .left-header p {margin-top: 0;margin-bottom: 0;line-height: 1.2;font-weight: bold;color: #62686c;font-size: 18px;}
                                 .header .left-header .left-bottom-header p {font-size: 22px;color: #000000;}
-                                .header .right-header .qrcode {width: 140;height: 140px;border-radius: 14px;border: 2px solid #000000;}
+                                .header .right-header .qrcode {width: 140;height: 140px;border-radius: 14px;}
                                 .content {padding: 15px 15px;}
                                 .photo-section {display: flex;}
                                 .photo-section .photo-wrapper {display: inline-block;}
@@ -260,14 +261,6 @@ const create = async (req, res) => {
                             </div>
                             <div style="overflow: auto;">
                                 <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 150px"/>
-                                <div style="float: left">
-                                    <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Company Name</h4>
-                                    <h5 style="margin: 0px;">Visa Application Form</h5>
-                                    <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Company Address</h4>
-                                    <h5 style="margin: 0px;">42 Ermin Street, Whytham</h5>
-                                    <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Phone Number</h4>
-                                    <h5 style="margin: 0px;">070 0359 4446</h5>
-                                </div>
                             </div>
                         </div>
                     `,
@@ -280,14 +273,18 @@ const create = async (req, res) => {
                 });
                 if (person.country === "UK") {
                     // SEND SMS
-                    let result = await twilio.messages.create({
-                        body: `
-                            Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
-                            Visa Application Form following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
-                        `,
-                        from: `+${process.env.TWILIO_PHONE}`,
-                        to: person.phone
-                    });
+                    try {
+                        await twilio.messages.create({
+                            body: `
+                                Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
+                                Visa Application Form following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
+                            `,
+                            from: `+${process.env.TWILIO_PHONE}`,
+                            to: person.phone
+                        });
+                    } catch (err) {
+                        console.log(err.message);
+                    }
                     // SEND WHATSAPP
                     // result = await twilio.messages.create({
                     //     body: `
@@ -349,7 +346,7 @@ const setAssign = async (req, res) => {
                 await assignment.save();
             } else {
                 let isExist = assignment.applications.filter((application) => application === id);
-                if (!isExist) {
+                if (isExist.length === 0) {
                     assignment.applications.push(id);
                     await assignment.save();
                 }
@@ -457,15 +454,7 @@ const update = async (req, res) => {
                             `
                         }
                         <div style="overflow: auto;">
-                        <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 15px;"/>
-                            <div style="float: left">
-                                <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Company Name</h4>
-                                <h5 style="margin: 0px;">Visa Application Form</h5>
-                                <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Company Address</h4>
-                                <h5 style="margin: 0px;">42 Ermin Street, Whytham</h5>
-                                <h4 style="margin-top: 5px; margin-bottom: 0px; line-height: 1.2; font-size: 20px; font-weight: bold;">Phone Number</h4>
-                                <h5 style="margin: 0px;">070 0359 4446</h5>
-                            </div>
+                            <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 15px;"/>
                         </div>
                     </div>
                 `,

@@ -31,24 +31,6 @@ const seedDB = async () => {
         await User.insertMany(seedUsers);
     }
 
-    let visaTypeCnts = await VisaType.countDocuments();
-    if (visaTypeCnts < 1) {
-        let seedVisaTypes = [{
-            name: "Express VIP Visa - 7 Working Days - 45 days"
-        }, {
-            name: "Ordinary Visa - 2 Weeks - 45 days"
-        }, {
-            name: "Treatment Express Visa - 1 Week - 30 days"
-        }, {
-            name: "Treatment Ordinary Visa - 2 Weeks - 30 days"
-        }, {
-            name: "Authorisation Code - 3/5 Working Days - 30 days"
-        }, {
-            name: "Authorisation Code - 3/5 Working Days - 45 days"
-        }];
-        await VisaType.insertMany(seedVisaTypes);
-    }
-
     let travelTypeCnts = await TravelType.countDocuments();
     if (travelTypeCnts < 1) {
         let seedTravelTypes = [{

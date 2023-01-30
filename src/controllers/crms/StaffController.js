@@ -61,6 +61,14 @@ const update = async (req, res) => {
     try {
         let { id } = req.params;
         let staff = req.body;
+        if (staff.password !== undefined) {
+            if (staff.password !== "") {
+                let salt = bcrypt.genSaltSync(10);
+                staff.password = bcrypt.hashSync(staff.password, salt);
+            } else {
+                delete staff.password;
+            }
+        }
         await User.findByIdAndUpdate(id, staff);
         res.json({
             status: true,
