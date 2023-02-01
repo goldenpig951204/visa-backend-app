@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 
 const LogoSchema = mongoose.Schema({
-    name: {
+    type: {
         type: String,
-        default: "Logo"
+        enum: ['email', 'user', 'admin'],
+        default: 'email'
     },
-    imageUrl: {
+    image: {
         type: String,
         required: true
     }

@@ -28,7 +28,7 @@ const ApplicationSchema = mongoose.Schema({
             type: Date,
             required: true
         }, 
-        country: {
+        nationality: {
             type: String,
             required: true
         },
@@ -45,6 +45,10 @@ const ApplicationSchema = mongoose.Schema({
             required: true,
             match: /.+\@.+\..+/
         },
+        occupation: {
+            type: String,
+            required: true
+        },
         visaType: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'VisaType',
@@ -57,6 +61,10 @@ const ApplicationSchema = mongoose.Schema({
         },
         passportNumber: {
             type: String,
+            required: true
+        },
+        visitedTimes: {
+            type: Number,
             required: true
         },
         issuedDate: {

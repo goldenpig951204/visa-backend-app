@@ -28,6 +28,9 @@ const UserSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    avatar: {
+        type: String
+    },
     balance: {
         type: Number,
         default: 100

@@ -60,6 +60,7 @@ const updateProfile = async (req, res) => {
     try {
         let { id } = req.params;
         let data = req.body;
+        if (req.file) data["avatar"] = req.file.filename;
         await User.findByIdAndUpdate(id, data);
         res.json({
             status: true,

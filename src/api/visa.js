@@ -32,4 +32,5 @@ router.post('/', upload.fields([{
 
 router.post('/order', VisaCtrl.order);
 router.post('/cancel', VisaCtrl.cancel);
+router.get('/applications/:id', VisaCtrl.getApplication);
 module.exports = router;

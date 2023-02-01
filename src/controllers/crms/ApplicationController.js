@@ -16,7 +16,7 @@ const Logo = require("../../models/Logo");
 
 
 const fetch = async (req, res) => {
-    let { userId, by } = req.query;
+    let { userId, search, by } = req.query;
     let user = await User.findById(userId);
     let applications = [];
     if (user.role === "staff") {
@@ -25,14 +25,62 @@ const fetch = async (req, res) => {
         }).populate({
             path: "applications",
             match: {
-                by: by
+                $and: [{
+                    by: by
+                }, {
+                    $or: [{
+                        "persons.passportNumber": new RegExp(search, "i")
+                    }, {
+                        "persons.firstName": new RegExp(search, "i")
+                    }, {
+                        "persons.lastName": new RegExp(search, "i")      
+                    }, {
+                        "persons.phone": new RegExp(search, "i")
+                    }, {
+                        "amount": isNaN(Number(search)) ? 0 : Number(search)
+                    }]
+                }]
             }
         });
         applications = assignment ? assignment.applications : [];
     } else if (user.role === "agent") {
-        applications = await Application.find({ by: by, agent: user._id });
+        applications = await Application.find({
+            $and: [{
+                by: by
+            }, {
+                agent: user._id
+            }, {
+                $or: [{
+                    "persons.passportNumber": new RegExp(search, "i")
+                }, {
+                    "persons.firstName": new RegExp(search, "i")
+                }, {
+                    "persons.lastName": new RegExp(search, "i")      
+                }, {
+                    "persons.phone": new RegExp(search, "i")
+                }, {
+                    "amount": isNaN(Number(search)) ? 0 : Number(search)
+                }]
+            }]
+        });
     } else {
-        applications = await Application.find({ by: by });
+        applications = await Application.find({ 
+            $and: [{
+                by: by 
+            }, {
+                $or: [{
+                    "persons.passportNumber": new RegExp(search, "i")
+                }, {
+                    "persons.firstName": new RegExp(search, "i")
+                }, {
+                    "persons.lastName": new RegExp(search, "i")      
+                }, {
+                    "persons.phone": new RegExp(search, "i")
+                }, {
+                    "amount": isNaN(Number(search)) ? 0 : Number(search)
+                }]
+            }]
+        });
     }
     res.json(applications);
 }
@@ -75,13 +123,15 @@ const create = async (req, res) => {
                 lastName: data.lastName[i],
                 fatherName: data.fatherName[i],
                 birthday: data.birthday[i],
-                country: data.country[i],
+                nationality: data.nationality[i],
                 phone: data.phone[i],
                 prevNationality: data.prevNationality[i],
                 email: data.email[i],
+                occupation: data.occupation[i],
                 visaType: data.visaType[i],
                 travelType: data.travelType[i],
                 passportNumber: data.passportNumber[i],
+                visitedTimes: data.visitedTimes[i],
                 issuedDate: data.issuedDate[i],
                 expireDate: data.expireDate[i],
                 personalPhoto: data.personalPhoto[i],
@@ -114,7 +164,7 @@ const create = async (req, res) => {
             });
             fs.writeFileSync(`uploads/barcodes/${barcodeFileName}`, barcodeBuffer);
             application = await Application.findById(application._id).populate(['persons.visaType', 'persons.travelType']);
-            let logo = await Logo.findOne();
+            let logo = await Logo.findOne({ type: "email" });
             persons = [];
             for (person of application.persons) {
                 let pdfOptions = { format: "A4" }
@@ -160,7 +210,7 @@ const create = async (req, res) => {
                                 <img src="${req.protocol}://${req.headers.host}/uploads/map.png" class="corp-map"/>
                                 <div class="left-header">
                                     <div class="left-top-header">
-                                        <img class="corp-logo" src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 140px; height: auto; margin-top: 25px"/>
+                                        <img class="corp-logo" src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.image}" style="max-width: 140px; height: auto; margin-top: 25px"/>
                                         <div><h3 class="corp-brand">Submitted Visa Application Form</h3></div>
                                     </div>
                                     <div class="left-bottom-header"><p>Date: ${moment().format("MM/DD/YYYY")}</p><p>Application ID: ${application._id}</p></div>
@@ -205,13 +255,15 @@ const create = async (req, res) => {
                     lastName: person.lastName,
                     fatherName: person.fatherName,
                     birthday: person.birthday,
-                    country: person.country,
+                    nationality: person.nationality,
                     phone: person.phone,
                     prevNationality: person.prevNationality,
                     email: person.email,
+                    occupation: person.occupation,
                     visaType: person.visaType,
                     travelType: person.travelType,
                     passportNumber: person.passportNumber,
+                    visitedTimes: person.visitedTimes,
                     issuedDate: person.issuedDate,
                     expireDate: person.expireDate,
                     personalPhoto: person.personalPhoto,
@@ -234,7 +286,7 @@ const create = async (req, res) => {
                                         <h4 style="margin-top: 5px; margin-bottom: 5px;">Application ID: ${application._id}</h4>
                                     </div> 
                                     <div style="float: right; text-align: right;">
-                                        <img src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 250px; height: auto;"/>
+                                        <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.image}" style="max-width: 250px; height: auto;"/>
                                     </div>
                                 </div>
                                 <div style="float:right; width: 40%; text-align: right;"><img src="${req.protocol}://${req.headers.host}/uploads/map.png" style="height: 120px;"/></div>
@@ -260,7 +312,7 @@ const create = async (req, res) => {
                                 </div>
                             </div>
                             <div style="overflow: auto;">
-                                <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 150px"/>
+                                <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.image}" style="float: left; max-width: 250px; height: auto; margin-right: 150px"/>
                             </div>
                         </div>
                     `,
@@ -385,7 +437,7 @@ const update = async (req, res) => {
             }
         }
         await application.update(data);
-        let logo = await Logo.findOne();
+        let logo = await Logo.findOne({type: "email"});
         for (person of application.persons) {
             let attachments = [{
                 content: fs.existsSync(`uploads/pdfs/${person.pdf}`) ? fs.readFileSync(`uploads/pdfs/${person.pdf}`).toString("base64") : "",
@@ -415,7 +467,7 @@ const update = async (req, res) => {
                                     <h4 style="margin-top: 5px; margin-bottom: 5px;">Application ID: ${application._id}</h4>
                                 </div> 
                                 <div style="float: right; text-align: right;">
-                                <img src="${req.protocol}://${req.headers.host}/uploads/${logo.imageUrl}" style="max-width: 250px; height: auto;"/>
+                                <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.image}" style="max-width: 250px; height: auto;"/>
                                 </div>
                             </div>
                             <div style="float:right; width: 40%; text-align: right;"><img src="https://instructorsdash.com/images/map.png" style="height: 120px;"/></div>
@@ -454,7 +506,7 @@ const update = async (req, res) => {
                             `
                         }
                         <div style="overflow: auto;">
-                            <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.imageUrl}" style="float: left; max-width: 250px; height: auto; margin-right: 15px;"/>
+                            <img src="${req.protocol}://${req.headers.host}/uploads/logos/${logo.image}" style="float: left; max-width: 250px; height: auto; margin-right: 15px;"/>
                         </div>
                     </div>
                 `,
