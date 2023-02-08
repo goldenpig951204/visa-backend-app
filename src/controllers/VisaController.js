@@ -22,7 +22,8 @@ const getVisaPrices = async (req, res) => {
 }
 
 const getAgentVisaPrices = async (req, res) => {
-    let agentVisaPrices = await AgentVisaPrice.find().populate('visaType');
+    let { categoryId } = req.query;
+    let agentVisaPrices = await AgentVisaPrice.find({ category: categoryId }).populate('visaType');
     res.json(agentVisaPrices);
 }
 

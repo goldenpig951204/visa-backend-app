@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[3681],{56693:function(n,u,t){(window.__NEXT_P=window.__NEXT_P||[]).push(["/crms/invoices",function(){return t(23466)}])},23466:function(n,u,t){"use strict";t.r(u);var _=t(85893);let e=()=>(0,_.jsx)(_.Fragment,{});u.default=e}},function(n){n.O(0,[9774,2888,179],function(){return n(n.s=56693)}),_N_E=n.O()}]);
