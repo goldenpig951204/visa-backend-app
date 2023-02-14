@@ -11,6 +11,7 @@ const { connect, seedDB } = require("./services/database");
 
 const app = express();
 
+app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());

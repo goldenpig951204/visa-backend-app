@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const VisaTypeSchema = mongoose.Schema({
     name: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     stay_duration: {
         type: Number,

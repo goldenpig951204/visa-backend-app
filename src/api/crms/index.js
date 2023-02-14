@@ -12,6 +12,12 @@ const logosApi = require("./logos");
 const communicationsApi = require("./communications");
 const announcementsApi = require("./announcements");
 const categoriesApi = require("./categories");
+const invoicesApi = require("./invoices");
+const transactionsApi = require("./transactions");
+const reportsApi = require("./reports");
+const contactsApi = require("./contacts");
+const settingApi = require("./setting");
+
 const router = express.Router();
 
 router.use('/auth', authApi);
@@ -26,5 +32,10 @@ router.use('/logos', logosApi);
 router.use('/communications', communicationsApi);
 router.use('/announcements', announcementsApi);
 router.use("/categories", categoriesApi);
+router.use("/invoices", invoicesApi);
+router.use("/transactions", transactionsApi);
+router.use("/reports", reportsApi);
+router.use("/contacts", contactsApi);
+router.use("/setting", settingApi);
 
 module.exports = router;

@@ -6,15 +6,16 @@ const bwipjs = require("bwip-js");
 var htmlToPdf = require("html-pdf-node");
 const moment = require("moment");
 const sgMail = require("@sendgrid/mail");
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const twilio = require("twilio")(process.env.TWILIO_API_KEY, process.env.TWILIO_API_SECRET);
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// const twilio = require("twilio")(process.env.TWILIO_API_KEY, process.env.TWILIO_API_SECRET_KEY);
+// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
+const Setting = require("../models/Setting");
 const Application = require("../models/Application");
+const Transaction = require("../models/Transaction");
 const VisaPrice = require("../models/VisaPrice");
 const AgentVisaPrice = require("../models/AgentVisaPrice");
 const TravelType = require("../models/TravelType");
 const Logo = require("../models/Logo");
-const { application } = require("express");
 
 const getVisaPrices = async (req, res) => {
     let visaPrices = await VisaPrice.find().populate('visaType');
@@ -86,6 +87,9 @@ const create = async (req, res) => {
             persons: persons,
             isPaid: false
         });
+        const setting = await Setting.findOne();
+        const stripe = require("stripe")(setting.STRIPE_SECRET_KEY)
+
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100,
             currency: "usd",
@@ -114,6 +118,18 @@ const order = async (req, res) => {
             isPaid: true,
             status: "received"
         });
+        // generate transaction
+        await Transaction.create({
+            orderId: orderNumber,
+            firstName: application.persons[0].firstName,
+            lastName: application.persons[0].lastName,
+            email: application.persons.email,
+            application: application._id,
+            amount: application.amount
+        });
+        /***  send email to global user to read transaction **/
+        // ~~~~~~~~~~~~~~~~~~~~~~~~
+        /********************/
         //  qr code generate
         let qrcodeFileName = `qrcode_${Date.now()}.png`;
         await qrcode.toFile(`uploads/qrcodes/${qrcodeFileName}`, id);
@@ -236,9 +252,12 @@ const order = async (req, res) => {
                 note: person.note
             });
             let attachment = fs.readFileSync(`uploads/pdfs/${pdfFileName}`).toString("base64");
+
+            let setting = await Setting.findOne();
+            sgMail.setApiKey(setting.SENDGRID_API_KEY);
             await sgMail.send({
                 to: person.email,
-                from: process.env.SENDGRID_USER,
+                from: setting.SENDGRID_USER,
                 subject: "Your Application has been submitted successfully.",
                 html: `
                     <div style="padding-top: 30px; padding-bottom: 30px;">
@@ -289,13 +308,14 @@ const order = async (req, res) => {
             });
             if (person.country === "UK") {
                 // SEND SMS
+                const twilio = require("twilio")(setting.TWILIO_API_KEY, setting.TWILIO_API_SECRET_KEY);
                 try {
                     await twilio.messages.create({
                         body: `
                             Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
                             Visa Application Form the following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
                         `,
-                        from: `+${process.env.TWILIO_PHONE}`,
+                        from: `+${setting.TWILIO_PHONE}`,
                         to: `${person.phone}`
                     });
                 } catch (err) {
@@ -307,7 +327,7 @@ const order = async (req, res) => {
                 //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
                 //         Visa Application Form / http://localhost:5000
                 //     `,
-                //     from: `whatsapp:+447380520373`,
+                //     from: `whatsapp:${setting.TWILIO_WHATSAPP_PHONE}`,
                 //     to: `whatsapp:+447470174216`
                 // });
             }
