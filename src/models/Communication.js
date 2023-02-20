@@ -9,12 +9,15 @@ const CommunicationSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-    message: {
+    text: {
         type: String,
     },
     isSeen: {
         type: Boolean,
         default: false
+    },
+    fileName: {
+        type: String,
     }
 }, {
     timestamps: true

@@ -5,6 +5,7 @@ const User = require("../../models/User");
 const login = async (req, res) => {
     try {
         let { email, password } = req.body;
+        console.log('req.body :>> ', req.body);
         let user = await User.findOne({ email });
         if (!user) {
             res.json({
@@ -53,7 +54,7 @@ const me = async (req, res) => {
             return res.sendStatus(401);
         }
         let userData = await User.findById(user.user_id);
-        res.json({userData});
+        res.json({ userData });
     });
 }
 const updateProfile = async (req, res) => {
@@ -81,7 +82,7 @@ const changePassword = async (req, res) => {
         if (bcrypt.compareSync(currentPassword, user.password)) {
             let salt = bcrypt.genSaltSync(10);
             let password = bcrypt.hashSync(newPassword, salt);
-            await user.update({password: password});
+            await user.update({ password: password });
             res.json({
                 status: true,
                 msg: "Successfully changed."

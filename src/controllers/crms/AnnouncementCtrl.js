@@ -15,9 +15,9 @@ const fetch = async (req, res) => {
         }).sort({ createdAt: -1 }).populate({
             path: "users",
             match: {
-             _id: userId
-            } 
-         });
+                _id: userId
+            }
+        });
     } else {
         announcements = await Announcement.find({
             $and: [{
@@ -33,9 +33,9 @@ const fetch = async (req, res) => {
         }).sort({ createdAt: -1 }).populate({
             path: "users",
             match: {
-             _id: userId
-            } 
-         });
+                _id: userId
+            }
+        });
     }
     res.json(announcements);
 }
@@ -103,8 +103,19 @@ const update = async (req, res) => {
 }
 
 const remove = async (req, res) => {
-    let { id } = req.params;
-
+    try {
+        let { id } = req.params;
+        let result = await Announcement.findByIdAndDelete(id);
+        res.json({
+            status: true,
+            msg: "Successfully deleted."
+        });
+    } catch (err) {
+        res.json({
+            status: false,
+            msg: err.message
+        });
+    }
 }
 
 module.exports = {

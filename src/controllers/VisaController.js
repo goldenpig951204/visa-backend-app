@@ -36,6 +36,7 @@ const getTravelTypes = async (req, res) => {
 const create = async (req, res) => {
     try {
         let data = req.body;
+        console.log('visacontroller-req :>> ', data);
         var fileKeys = Object.keys(req.files);
         var passportPhoto = [];
         var personalPhoto = [];
@@ -59,7 +60,7 @@ const create = async (req, res) => {
         let persons = [];
         let amount = 0;
         for (let i = 0; i < data.firstName.length; i++) {
-            let visaPrice = await VisaPrice.findOne({visaType: data.visaType[i]});
+            let visaPrice = await VisaPrice.findOne({ visaType: data.visaType[i] });
             amount += Number(visaPrice.price);
             let person = {
                 firstName: data.firstName[i],
@@ -147,7 +148,7 @@ const order = async (req, res) => {
         let logo = await Logo.findOne({ type: "email" });
         let persons = [];
         for (person of application.persons) {
-            let pdfOptions = {format: "A4"}
+            let pdfOptions = { format: "A4" }
             let htmlFile = {
                 content: `
                     <html lang="en">
@@ -332,7 +333,7 @@ const order = async (req, res) => {
                 // });
             }
         }
-        await Application.findByIdAndUpdate(id, {persons: persons});
+        await Application.findByIdAndUpdate(id, { persons: persons });
         res.json({
             status: true,
             msg: `Your Application has been submitted successfully. Please check your email.`
