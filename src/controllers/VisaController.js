@@ -36,7 +36,6 @@ const getTravelTypes = async (req, res) => {
 const create = async (req, res) => {
     try {
         let data = req.body;
-        console.log('visacontroller-req :>> ', data);
         var fileKeys = Object.keys(req.files);
         var passportPhoto = [];
         var personalPhoto = [];
@@ -89,7 +88,7 @@ const create = async (req, res) => {
             isPaid: false
         });
         const setting = await Setting.findOne();
-        const stripe = require("stripe")(setting.STRIPE_SECRET_KEY)
+        const stripe = require("stripe")(setting.STRIPE_SECRET_KEY ? setting.STRIPE_SECRET_KEY : process.env.STRIPE_SECRET_KEY)
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100,
@@ -255,10 +254,10 @@ const order = async (req, res) => {
             let attachment = fs.readFileSync(`uploads/pdfs/${pdfFileName}`).toString("base64");
 
             let setting = await Setting.findOne();
-            sgMail.setApiKey(setting.SENDGRID_API_KEY);
+            sgMail.setApiKey(setting.SENDGRID_API_KEY ? setting.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY);
             await sgMail.send({
                 to: person.email,
-                from: setting.SENDGRID_USER,
+                from: setting.SENDGRID_USER ? setting.SENDGRID_USER : process.env.SENDGRID_USER,
                 subject: "Your Application has been submitted successfully.",
                 html: `
                     <div style="padding-top: 30px; padding-bottom: 30px;">
@@ -309,14 +308,14 @@ const order = async (req, res) => {
             });
             if (person.country === "UK") {
                 // SEND SMS
-                const twilio = require("twilio")(setting.TWILIO_API_KEY, setting.TWILIO_API_SECRET_KEY);
+                const twilio = require("twilio")(setting.TWILIO_API_KEY ? setting.TWILIO_API_KEY : process.env.TWILIO_API_KEY, setting.TWILIO_API_SECRET_KEY ? setting.TWILIO_API_SECRET_KEY : process.env.TWILIO_API_SECRET_KEY);
                 try {
                     await twilio.messages.create({
                         body: `
                             Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
                             Visa Application Form the following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
                         `,
-                        from: `+${setting.TWILIO_PHONE}`,
+                        from: `+${setting.TWILIO_PHONE ? setting.TWILIO_PHONE : process.env.TWILIO_PHONE}`,
                         to: `${person.phone}`
                     });
                 } catch (err) {
@@ -328,7 +327,7 @@ const order = async (req, res) => {
                 //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
                 //         Visa Application Form / http://localhost:5000
                 //     `,
-                //     from: `whatsapp:${setting.TWILIO_WHATSAPP_PHONE}`,
+                //     from: `whatsapp:${setting.TWILIO_WHATSAPP_PHONE ? setting.TWILIO_WHATSAPP_PHONE : process.env.TWILIO_WHATSAPP_PHONE}`,
                 //     to: `whatsapp:+447470174216`
                 // });
             }

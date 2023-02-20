@@ -289,7 +289,7 @@ const create = async (req, res) => {
                     });
                     // let attachment = fs.readFileSync(`uploads/pdfs/${pdfFileName}`).toString("base64");
                     // let setting = await Setting.findOne();
-                    // sgMail.setApiKey(setting.SENDGRID_API_KEY);
+                    // sgMail.setApiKey(setting.SENDGRID_API_KEY ? setting.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY);
 
                     // await sgMail.send({
                     //     to: person.email,
@@ -482,7 +482,7 @@ const update = async (req, res) => {
             }
 
             // let setting = await Setting.findOne();
-            // sgMail.setApiKey(setting.SENDGRID_API_KEY);
+            // sgMail.setApiKey(setting.SENDGRID_API_KEY ? setting.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY);
             
             // await sgMail.send({
             //     to: person.email,
