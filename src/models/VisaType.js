@@ -6,8 +6,8 @@ const VisaTypeSchema = mongoose.Schema({
         required: true
     },
     stay_duration: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "VisaDuration"
     },
     issue_duration: {
         type: Number,

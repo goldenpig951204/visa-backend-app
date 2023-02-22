@@ -18,13 +18,23 @@ const TravelType = require("../models/TravelType");
 const Logo = require("../models/Logo");
 
 const getVisaPrices = async (req, res) => {
-    let visaPrices = await VisaPrice.find().populate('visaType');
+    let visaPrices = await VisaPrice.find().populate({
+        path: "visaType",
+        populate: {
+            path: "stay_duration"
+        }
+    });
     res.json(visaPrices);
 }
 
 const getAgentVisaPrices = async (req, res) => {
     let { categoryId } = req.query;
-    let agentVisaPrices = await AgentVisaPrice.find({ category: categoryId }).populate('visaType');
+    let agentVisaPrices = await AgentVisaPrice.find({ category: categoryId }).populate({
+        path: "visaType",
+        populate: {
+            path: "stay_duration"
+        }
+    });
     res.json(agentVisaPrices);
 }
 
@@ -88,7 +98,7 @@ const create = async (req, res) => {
             isPaid: false
         });
         const setting = await Setting.findOne();
-        const stripe = require("stripe")(setting.STRIPE_SECRET_KEY ? setting.STRIPE_SECRET_KEY : process.env.STRIPE_SECRET_KEY)
+        const stripe = require("stripe")(setting !== null && setting.STRIPE_SECRET_KEY ? setting.STRIPE_SECRET_KEY : process.env.STRIPE_SECRET_KEY)
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100,
@@ -254,10 +264,10 @@ const order = async (req, res) => {
             let attachment = fs.readFileSync(`uploads/pdfs/${pdfFileName}`).toString("base64");
 
             let setting = await Setting.findOne();
-            sgMail.setApiKey(setting.SENDGRID_API_KEY ? setting.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY);
+            sgMail.setApiKey(setting !== null && setting.SENDGRID_API_KEY ? setting.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY);
             await sgMail.send({
                 to: person.email,
-                from: setting.SENDGRID_USER ? setting.SENDGRID_USER : process.env.SENDGRID_USER,
+                from: setting !== null && setting.SENDGRID_USER ? setting.SENDGRID_USER : process.env.SENDGRID_USER,
                 subject: "Your Application has been submitted successfully.",
                 html: `
                     <div style="padding-top: 30px; padding-bottom: 30px;">
@@ -306,31 +316,31 @@ const order = async (req, res) => {
                     disposition: "attachment"
                 }]
             });
-            if (person.country === "UK") {
-                // SEND SMS
-                const twilio = require("twilio")(setting.TWILIO_API_KEY ? setting.TWILIO_API_KEY : process.env.TWILIO_API_KEY, setting.TWILIO_API_SECRET_KEY ? setting.TWILIO_API_SECRET_KEY : process.env.TWILIO_API_SECRET_KEY);
-                try {
-                    await twilio.messages.create({
-                        body: `
-                            Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
-                            Visa Application Form the following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
-                        `,
-                        from: `+${setting.TWILIO_PHONE ? setting.TWILIO_PHONE : process.env.TWILIO_PHONE}`,
-                        to: `${person.phone}`
-                    });
-                } catch (err) {
-                    console.log(err.message);
-                }
-                // SEND WHATSAPP
-                // result = await twilio.messages.create({
-                //     body: `
-                //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
-                //         Visa Application Form / http://localhost:5000
-                //     `,
-                //     from: `whatsapp:${setting.TWILIO_WHATSAPP_PHONE ? setting.TWILIO_WHATSAPP_PHONE : process.env.TWILIO_WHATSAPP_PHONE}`,
-                //     to: `whatsapp:+447470174216`
-                // });
+            // SEND SMS
+            const twilio = require("twilio")(setting !== null && setting.TWILIO_API_KEY ? setting.TWILIO_API_KEY : process.env.TWILIO_API_KEY, setting !== null && setting.TWILIO_API_SECRET_KEY ? setting.TWILIO_API_SECRET_KEY : process.env.TWILIO_API_SECRET_KEY);
+            try {
+                console.log(process.env.TWILIO_PHONE, "PHONE=====>", person.phone)
+                await twilio.messages.create({
+                    body: `
+                        Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
+                        Visa Application Form the following url. ${req.protocol}://${req.hostname}/uploads/pdfs/${pdfFileName}
+                    `,
+                    from: `+${setting !== null && setting.TWILIO_PHONE ? setting.TWILIO_PHONE : process.env.TWILIO_PHONE}`,
+                    to: `${person.phone}`
+                });
+                console.log("send");
+            } catch (err) {
+                console.log(err.message);
             }
+            // SEND WHATSAPP
+            // result = await twilio.messages.create({
+            //     body: `
+            //         Your Visa Application ${application._id} has been submitted successfully, You wil receive an email shortly with details of your application, please allow 10 days before tracking your application.
+            //         Visa Application Form / http://localhost:5000
+            //     `,
+            //     from: `whatsapp:${setting.TWILIO_WHATSAPP_PHONE ? setting.TWILIO_WHATSAPP_PHONE : process.env.TWILIO_WHATSAPP_PHONE}`,
+            //     to: `whatsapp:+447470174216`
+            // });
         }
         await Application.findByIdAndUpdate(id, { persons: persons });
         res.json({

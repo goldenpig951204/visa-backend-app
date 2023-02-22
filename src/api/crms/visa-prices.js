@@ -4,6 +4,7 @@ const VisaPriceCtrl = require("../../controllers/crms/VisaPriceController");
 
 router.post("/", VisaPriceCtrl.create);
 router.get("/", VisaPriceCtrl.fetch);
+router.get("/get-by-duration/:id", VisaPriceCtrl.fetchByDuration)
 router.get("/:id", VisaPriceCtrl.fetchById);
 router.put("/:id", VisaPriceCtrl.update);
 router.delete("/:id", VisaPriceCtrl.remove);

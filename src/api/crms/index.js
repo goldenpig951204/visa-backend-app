@@ -8,7 +8,7 @@ const applicationsApi = require('./applications');
 const visaTypesApi = require('./visa-types');
 const visaPricesApi = require('./visa-prices');
 const visaDurationApi = require('./visa-durations');
-const occupationItemsAPI = require('./occupation-items');
+const occupationApi = require('./occupations');
 const agentVisaPricesApi = require('./agent-visa-prices');
 const logosApi = require("./logos");
 const communicationsApi = require("./communications");
@@ -30,7 +30,7 @@ router.use('/applications', applicationsApi);
 router.use('/visa-types', visaTypesApi);
 router.use('/visa-prices', visaPricesApi);
 router.use('/visa-durations', visaDurationApi);
-router.use('/occupation-items', occupationItemsAPI)
+router.use('/occupations', occupationApi)
 router.use('/agent-visa-prices', agentVisaPricesApi);
 router.use('/logos', logosApi);
 router.use('/communications', communicationsApi);

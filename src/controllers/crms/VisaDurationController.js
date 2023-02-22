@@ -1,26 +1,23 @@
-const OccupationItems = require("../../models/VisaDuration");
+const VisaDuration = require("../../models/VisaDuration");
 
 const fetch = async (req, res) => {
-    let types = await OccupationItems.find();
+    let types = await VisaDuration.find();
     return res.json(types);
 }
 
 const create = async (req, res) => {
     try {
         let data = req.body;
-        console.log('temp :>> ', data);
-        await OccupationItems.create(data);
+        await VisaDuration.create(data);
         res.json({
             status: true,
             msg: "Successfully created."
         });
     } catch (err) {
-        const temp =
-            res.json({
-                status: false,
-                msg: err.message
-            });
-        console.log(err.message);
+        res.json({
+            status: false,
+            msg: err.message
+        });
     }
 }
 
@@ -28,7 +25,7 @@ const update = async (req, res) => {
     try {
         let { id } = req.params;
         let data = req.body;
-        await OccupationItems.findByIdAndUpdate(id, data);
+        await VisaDuration.findByIdAndUpdate(id, data);
         res.json({
             status: true,
             msg: "Successfully updated."
@@ -44,7 +41,7 @@ const update = async (req, res) => {
 const remove = async (req, res) => {
     try {
         let { id } = req.params;
-        await OccupationItems.findOneAndDelete({ visaType: id });
+        await VisaDuration.findOneAndDelete({ visaType: id });
         res.json({
             status: true,
             msg: "Successfully deleted."

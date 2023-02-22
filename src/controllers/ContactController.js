@@ -6,11 +6,11 @@ const save = async (req, res) => {
     try {
         let mail = req.body.mailInfo;
         let setting = await Setting.findOne();
-        sgMail.setApiKey(setting.SENDGRID_API_KEY);
+        sgMail.setApiKey(setting !== null && setting.SENDGRID_API_KEY ? setting.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY);
 
         await sgMail.send({
             to: "info@irvisa.online",
-            from: setting.SENDGRID_USER,
+            from: setting !== null && setting.SENDGRID_USER ? setting.SENDGRID_USER : process.env.SENDGRID_USER,
             subject: mail.subject,
             html: `<div>
                 <div style="margin-bottom: 15px;">${mail.message}</div>

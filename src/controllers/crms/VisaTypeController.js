@@ -3,7 +3,7 @@ const VisaPrice = require("../../models/VisaPrice");
 const AgentVisaPrice = require("../../models/AgentVisaPrice");
 
 const fetch = async (req, res) => {
-    let types = await VisaType.find();
+    let types = await VisaType.find().populate("stay_duration");
     return res.json(types);
 }
 

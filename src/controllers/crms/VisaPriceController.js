@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const VisaPrice = require("../../models/VisaPrice");
 
 const create = async (req, res) => {
@@ -50,6 +51,23 @@ const fetchById = async (req, res) => {
     res.json(price);
 }
 
+const fetchByDuration = async (req, res) => {
+    let { id } = req.params;
+    let prices = await VisaPrice.aggregate([{
+        $lookup: {
+            from: 'visatypes',
+            localField: 'visaType',
+            foreignField: '_id',
+            as: 'visa'
+        }
+    }, {
+        $match: {
+            "visa.stay_duration": mongoose.Types.ObjectId(id)
+        }
+    }]);
+    res.json(prices);
+}
+
 const update = async (req, res) => {
     try {
         let { id } = req.params;
@@ -88,6 +106,7 @@ module.exports = {
     create,
     fetch,
     fetchById,
+    fetchByDuration,
     update,
     remove
 }

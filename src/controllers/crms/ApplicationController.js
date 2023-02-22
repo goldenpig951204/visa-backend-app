@@ -65,7 +65,7 @@ const fetch = async (req, res) => {
                     "amount": isNaN(Number(search)) ? 0 : Number(search)
                 }]
             }]
-        }).lean();
+        }).populate("persons.visaType").lean();
         for (let i = 0; i < applications.length; i++) {
             let assignment = await ApplicationAssignment.findOne({
                 applications: { $in : applications[i]._id }

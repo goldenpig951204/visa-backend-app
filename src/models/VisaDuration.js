@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
 
 const VisaDurationSchema = mongoose.Schema({
-  duration: {
+  name: {
       type: String,
       required: true
+  },
+  slug: {
+    type: String,
+    required: true
   }
 }, {
   timestamps: true

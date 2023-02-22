@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const LogoSchema = mongoose.Schema({
     type: {
         type: String,
-        enum: ['email', 'user', 'admin'],
+        enum: ['email', 'user', 'admin', 'footer'],
         default: 'email'
     },
     image: {
