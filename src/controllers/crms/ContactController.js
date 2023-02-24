@@ -3,13 +3,31 @@ const Contact = require("../../models/Contact");
 
 const fetch = async (req, res) => {
     let { search } = req.query;
-    let contacts = await Contact.find({
-        $or: [{
-            subject: new RegExp(search, "i")
-        }, {
-            message: new RegExp(search, "i")
-        }]
-    }).sort({ createdAt: -1 });
+    let contacts = await Contact.aggregate([{
+        $lookup: {
+            from: "replycontacts",
+            localField: "_id",
+            foreignField: "contact",
+            as: "replyContacts",
+            pipeline: [{
+                $lookup: {
+                    from: "users",
+                    localField: "admin",
+                    foreignField: "_id",
+                    as: "users"
+                }
+            }]
+        }
+    }, {
+        $match: {
+            $or: [{
+                subject: new RegExp(search, "i")
+            }, {
+                message: new RegExp(search, "i")
+            }]
+        }
+    }]).sort({ createdAt: -1 });
+
     res.json(contacts);
 }
 

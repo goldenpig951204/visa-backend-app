@@ -6,9 +6,6 @@ const bwipjs = require("bwip-js");
 var htmlToPdf = require("html-pdf-node");
 const moment = require("moment");
 const sgMail = require("@sendgrid/mail");
-// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-// const twilio = require("twilio")(process.env.TWILIO_API_KEY, process.env.TWILIO_API_SECRET_KEY);
-// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 const Setting = require("../models/Setting");
 const Application = require("../models/Application");
 const Transaction = require("../models/Transaction");

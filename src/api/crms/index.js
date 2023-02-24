@@ -18,6 +18,7 @@ const invoicesApi = require("./invoices");
 const transactionsApi = require("./transactions");
 const reportsApi = require("./reports");
 const contactsApi = require("./contacts");
+const replyContactsApi = require("./reply-contacts");
 const settingApi = require("./setting");
 
 const router = express.Router();
@@ -40,6 +41,7 @@ router.use("/invoices", invoicesApi);
 router.use("/transactions", transactionsApi);
 router.use("/reports", reportsApi);
 router.use("/contacts", contactsApi);
+router.use("/reply-contacts", replyContactsApi);
 router.use("/setting", settingApi);
 
 module.exports = router;

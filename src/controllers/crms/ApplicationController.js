@@ -39,7 +39,12 @@ const fetch = async (req, res) => {
                         "amount": isNaN(Number(search)) ? 0 : Number(search)
                     }]
                 }]
-            }
+            },
+            populate: [{
+                path: "agent"
+            }, {
+                path: "persons.visaType"
+            }]
         }).lean();
         applications = assignment ? assignment.applications : [];
         applications = applications.map(application => {
@@ -65,7 +70,7 @@ const fetch = async (req, res) => {
                     "amount": isNaN(Number(search)) ? 0 : Number(search)
                 }]
             }]
-        }).populate("persons.visaType").lean();
+        }).populate(["persons.visaType", "agent"]).lean();
         for (let i = 0; i < applications.length; i++) {
             let assignment = await ApplicationAssignment.findOne({
                 applications: { $in : applications[i]._id }
@@ -89,7 +94,7 @@ const fetch = async (req, res) => {
                     "amount": isNaN(Number(search)) ? 0 : Number(search)
                 }]
             }]
-        }).populate("persons.visaType").lean();
+        }).populate(["persons.visaType", "agent"]).lean();
         for (let i = 0; i < applications.length; i++) {
             let assignment = await ApplicationAssignment.findOne({
                 applications: { $in : applications[i]._id }

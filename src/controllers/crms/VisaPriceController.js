@@ -31,7 +31,15 @@ const fetch = async (req, res) => {
             from: 'visatypes',
             localField: 'visaType',
             foreignField: '_id',
-            as: 'visa'
+            as: 'visa',
+            pipeline: [{
+                $lookup: {
+                    from: "visadurations",
+                    localField: "stay_duration",
+                    foreignField: "_id",
+                    as: "stay_duration"
+                }
+            }]
         },
     }, {
         $match: {
