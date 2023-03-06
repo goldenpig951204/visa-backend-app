@@ -1,3 +1,0 @@
-SELECT DISTINCT tbl3.name AS name1, tbl6.name AS name2 FROM (SELECT tbl1.id, tbl1.name, tbl2.book_id FROM reviewers AS tbl1 JOIN ratings AS tbl2 ON tbl1.id = tbl2.reviewer_id) AS tbl3 LEFT JOIN (SELECT tbl4.id, tbl4.name, tbl5.book_id FROM reviewers AS tbl4 JOIN ratings AS tbl5 ON tbl4.id = tbl5.reviewer_id) AS tbl6 ON tbl3.id <> tbl6.id AND tbl3.book_id = tbl6.book_id WHERE tbl3.name < tbl6.name
-
-https://eval.devskiller.com/7QHP-D7TD-QHY7/assignment/EP0F

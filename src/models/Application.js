@@ -98,9 +98,15 @@ const ApplicationSchema = mongoose.Schema({
     note: {
         type: String
     },
-    attach: {
-        type: String
-    },
+    attaches: [{
+        file: {
+            type: String
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now()
+        }   
+    }],
     by: {
         type: String,
         enum: ['global', 'agent'],

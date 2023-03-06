@@ -3,17 +3,28 @@ const VisaPrice = require("../../models/VisaPrice");
 
 const create = async (req, res) => {
     try {
-        let isExist = await VisaPrice.countDocuments({ visaType: req.body.visaType });
-        if (isExist) {
-            res.json({
-                status: false,
-                msg: "The visa has already been assigned a price."
-            });
-        } else {
-            await VisaPrice.create(req.body);
+        let { visaType, nationalities, price } = req.body;
+        let status = 0;
+        for (let nationality of nationalities) {
+            let cnt = await VisaPrice.countDocuments({ visaType: visaType, nationality: nationality });
+            if (cnt > 0) status++;
+        }
+        if (status == 0) {
+            for (let nationality of nationalities) {
+                await VisaPrice.create({
+                    visaType,
+                    nationality,
+                    price
+                });
+            }
             res.json({
                 status: true,
                 msg: "The visa price is assigned successully."
+            })
+        } else {
+            res.json({
+                status: false,
+                msg: "The type of visa or Nationality is duplicated."
             });
         }
     } catch (err) {
@@ -70,7 +81,8 @@ const fetchByDuration = async (req, res) => {
         }
     }, {
         $match: {
-            "visa.stay_duration": mongoose.Types.ObjectId(id)
+            "visa.stay_duration": mongoose.Types.ObjectId(id),
+            "nationality": "default"
         }
     }]);
     res.json(prices);

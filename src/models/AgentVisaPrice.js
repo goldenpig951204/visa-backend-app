@@ -11,6 +11,10 @@ const AgentVisaPriceSchema = mongoose.Schema({
         ref: 'Category',
         required: true
     },
+    nationality: {
+        type: String,
+        required: true
+    },
     price: {
         type: Number,
         required: true

@@ -6,6 +6,10 @@ const VisaPriceSchema = mongoose.Schema({
         ref: 'VisaType',
         required: true
     },
+    nationality: {
+        type: String,
+        required: true
+    },
     price: {
         type: Number,
         required: true

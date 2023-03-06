@@ -138,8 +138,13 @@ const create = async (req, res) => {
             let persons = [];
             let amount = 0;
             for (let i = 0; i < data.firstName.length; i++) {
-                let visaPrice = await AgentVisaPrice.findOne({ visaType: data.visaType[i], category: user.category });
-                amount += Number(visaPrice.price);
+                let visaPrice = await AgentVisaPrice.findOne({ visaType: data.visaType[i], category: user.category, nationality: data.nationality[i] });
+                if (visaPrice === null) {
+                    visaPrice === await AgentVisaPrice.findOne({ visaType: data.visaType[i], category: user.category, nationality: "default" });
+                }
+                if (visaPrice !== null) {
+                    amount += Number(visaPrice.price);
+                }
                 let person = {
                     firstName: data.firstName[i],
                     lastName: data.lastName[i],
@@ -462,10 +467,17 @@ const update = async (req, res) => {
         let { id } = req.params;
         let data = req.body;
         let application = await Application.findById(id);
-        if (req.file) {
-            data['attach'] = req.file.filename;
-            if (application.attach && fs.existsSync(`uploads/attachments/${application.attach}`)) {
-                fs.unlinkSync(`uploads/attachments/${application.attach}`);
+        if (req.files) {
+            data['attaches'] = req.files.map(file => {
+                return {
+                    file: file.filename,
+                    createdAt: Date.now()
+                }
+            });
+            for (let attach of application.attaches) {
+                if (fs.existsSync(`uploads/attachments/${attach}`)) {
+                    fs.unlinkSync(`uploads/attachments/${attach}`);
+                }
             }
         }
         await application.update(data);

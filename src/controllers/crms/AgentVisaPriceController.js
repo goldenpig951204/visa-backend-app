@@ -8,7 +8,15 @@ const fetch = async (req, res) => {
             from: 'visatypes',
             localField: 'visaType',
             foreignField: '_id',
-            as: 'visa'
+            as: 'visa',
+            pipeline: [{
+                $lookup: {
+                    from: "visadurations",
+                    localField: "stay_duration",
+                    foreignField: "_id",
+                    as: "stay_duration"
+                }
+            }]
         },
     }, {
         $match: {
@@ -34,18 +42,31 @@ const fetchById = async (req, res) => {
 
 const create = async (req, res) => {
     try {
-        console.log(req.body);
-        let isExist = await AgentVisaPrice.countDocuments({ visaType: req.body.visaType, category: req.body.category });
-        if (isExist) {
-            res.json({
-                status: false,
-                msg: "The visa has already been assigned a price."
-            });
-        } else {
-            await AgentVisaPrice.create(req.body);
+        let { visaType, category, nationalities, price } = req.body;
+        let status = 0;
+        for (let nationality of nationalities) {
+            console.group(visaType, category, nationality);
+            let cnt = await AgentVisaPrice.countDocuments({ visaType: visaType, category: category, nationality: nationality });
+            console.log(cnt);
+            if (cnt > 0) status++;
+        }
+        if (status == 0) {
+            for (let nationality of nationalities) {
+                await AgentVisaPrice.create({
+                    visaType,
+                    category,
+                    nationality,
+                    price
+                });
+            }
             res.json({
                 status: true,
-                msg: "The visa price is assigned successully."
+                msg: "The visa price is assiend successfully."
+            });
+        } else {
+            res.json({
+                status: false,
+                msg: "The type of visa or nationality is duplicated."
             });
         }
     } catch (err) {

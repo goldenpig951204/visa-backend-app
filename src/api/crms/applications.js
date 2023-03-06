@@ -16,7 +16,7 @@ const applicationStorage = multer.diskStorage({
         cb(null, filename + '-' + Date.now() + path.extname(file.originalname));
     }
 });
-const attachStorage = multer.diskStorage({
+const attachesStorage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, "uploads/attachments/");
     },
@@ -26,7 +26,7 @@ const attachStorage = multer.diskStorage({
 });
 
 const applicationUpload = multer({ storage: applicationStorage });
-const attachUpload = multer({ storage: attachStorage });
+const attachesUpload = multer({ storage: attachesStorage });
 const ApplicationCtrl = require("../../controllers/crms/ApplicationController");
 
 router.get("/", ApplicationCtrl.fetch);
@@ -40,7 +40,7 @@ router.post("/", applicationUpload.fields([{
 }]), ApplicationCtrl.create);
 router.get("/:id/assign", ApplicationCtrl.getAssign);
 router.put("/:id/assign", ApplicationCtrl.setAssign);
-router.put("/:id", attachUpload.single('attach'), ApplicationCtrl.update);
+router.put("/:id", attachesUpload.array('attaches[]', 10), ApplicationCtrl.update);
 router.delete("/:id", ApplicationCtrl.remove);
 
 module.exports = router;

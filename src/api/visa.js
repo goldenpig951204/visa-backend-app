@@ -19,6 +19,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const VisaCtrl = require("../controllers/VisaController");
 
+router.get('/visa-types', VisaCtrl.getVisaTypes);
 router.get('/visa-prices', VisaCtrl.getVisaPrices);
 router.get('/agent-visa-prices', VisaCtrl.getAgentVisaPrices);
 router.get('/travel-types', VisaCtrl.getTravelTypes);

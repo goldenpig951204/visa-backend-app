@@ -9,30 +9,57 @@ const sgMail = require("@sendgrid/mail");
 const Setting = require("../models/Setting");
 const Application = require("../models/Application");
 const Transaction = require("../models/Transaction");
+const VisaType = require("../models/VisaType");
 const VisaPrice = require("../models/VisaPrice");
 const AgentVisaPrice = require("../models/AgentVisaPrice");
 const TravelType = require("../models/TravelType");
 const Logo = require("../models/Logo");
 
+const getVisaTypes = async (req, res) => {
+    let types = await VisaType.find().populate("stay_duration");
+    return res.json(types);
+}
+
 const getVisaPrices = async (req, res) => {
-    let visaPrices = await VisaPrice.find().populate({
-        path: "visaType",
-        populate: {
-            path: "stay_duration"
+    const { nationality } = req.query;
+
+    let visaTypes = await VisaType.find().populate("stay_duration").lean();
+    for (let i = 0; i < visaTypes.length; i++) {
+        let visaPrice = await VisaPrice.findOne({
+            visaType: visaTypes[i]._id, 
+            nationality: nationality 
+        }).select({ price: 1 }).lean();
+        if (visaPrice === null) {
+            visaPrice = await VisaPrice.findOne({
+                visaType: visaTypes[i]._id, 
+                nationality: "default" 
+            });
         }
-    });
-    res.json(visaPrices);
+        visaTypes[i].price = visaPrice.price;
+    }
+
+    res.json(visaTypes);
 }
 
 const getAgentVisaPrices = async (req, res) => {
-    let { categoryId } = req.query;
-    let agentVisaPrices = await AgentVisaPrice.find({ category: categoryId }).populate({
-        path: "visaType",
-        populate: {
-            path: "stay_duration"
+    let { categoryId, nationality } = req.query;
+    let visaTypes = await VisaType.find().populate("stay_duration").lean();
+    for (let i = 0; i < visaTypes.length; i++) {
+        let visaPrice = await AgentVisaPrice.findOne({ 
+            visaType: visaTypes[i]._id, 
+            category: categoryId, 
+            nationality: nationality 
+        }).select({ price: 1 }).lean();
+        if (visaPrice === null) {
+            visaPrice = await AgentVisaPrice.findOne({ 
+                visaType: visaTypes[i]._id, 
+                category: categoryId, 
+                nationality: "default" 
+            }).select({ price: 1 }).lean();
         }
-    });
-    res.json(agentVisaPrices);
+        visaTypes[i].price = visaPrice.price;
+    }
+    res.json(visaTypes);
 }
 
 const getTravelTypes = async (req, res) => {
@@ -65,9 +92,15 @@ const create = async (req, res) => {
 
         let persons = [];
         let amount = 0;
+
         for (let i = 0; i < data.firstName.length; i++) {
-            let visaPrice = await VisaPrice.findOne({ visaType: data.visaType[i] });
-            amount += Number(visaPrice.price);
+            let visaPrice = await VisaPrice.findOne({ visaType: data.visaType[i], nationality: data.nationality[i] });
+            if (visaPrice === null) {
+                visaPrice = await VisaPrice.findOne({ visaType: data.visaType[i], nationality: "default" });
+            }
+            if (visaPrice !== null) {
+                amount += Number(visaPrice.price);
+            }
             let person = {
                 firstName: data.firstName[i],
                 lastName: data.lastName[i],
@@ -376,6 +409,7 @@ const getApplication = async (req, res) => {
 }
 
 module.exports = {
+    getVisaTypes,
     getVisaPrices,
     getAgentVisaPrices,
     getTravelTypes,
